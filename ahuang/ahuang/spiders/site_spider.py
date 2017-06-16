@@ -198,37 +198,7 @@ class SiteOumopider(scrapy.Spider):
 		for img in url:
 			imgurl = urljoin('https://v3download.om.cn/',img),
 			yield ImageItem(url=imgurl,created=datetime.now())
-
-   
-class SiteJuzimiSpider(scrapy.Spider):
-
-	name = "juzimi"
-	CUSTOM_SETTINGS = {
-    	"DOWNLOAD_DELAY": 1,
-    	"CONCURRENT_REQUESTS_PER_DOMAIN": 20
-	}
-	headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'
-        }
-       
-	start_urls = ["http://www.juzimi.com/meitumeiju/shouxiemeiju"]
-
-	pattern = re.compile(r'\d+')
-	detailpatt = re.compile(r'_\d+')
-
-	def start_requests(self):
-		for url in self.start_urls:
-			yield scrapy.Request(url,self.parse_page)
-
-	def parse_page(self,response):
-		page = 0
-		imgs = response.css(".chromeimg::attr(src)").extract()
-		for img in imgs:
-			yield ImageItem(url=urljoin("http:",img),created=datetime.now(),source=response.url)
 	
-
-	
-
 
 class SiteBaiduTextSpider(scrapy.Spider):
 
@@ -257,3 +227,28 @@ class SiteBaiduTextSpider(scrapy.Spider):
 			if objURL:
 				url = uncompile_url(objURL)
 				yield ImageItem(url=url,created=datetime.now())
+
+
+class SiteJuzimiSpider(scrapy.Spider):
+
+	name = "juzimi"
+	CUSTOM_SETTINGS = {
+    	"DOWNLOAD_DELAY": 1,
+    	"CONCURRENT_REQUESTS_PER_DOMAIN": 20
+	}
+	headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'
+        }
+       
+	base_url = "http://www.juzimi.com/meitumeiju/shouxiemeiju?page={}"
+
+
+	def start_requests(self):
+		for idx in xrange(1,31):
+			yield scrapy.Request(self.base_url.format(idx),self.parse_page)
+
+	def parse_page(self,response):
+		imgs = response.css(".chromeimg::attr(src)").extract()
+		for img in imgs:
+			yield ImageItem(url=urljoin("http:",img),created=datetime.now(),source=response.url)
+
