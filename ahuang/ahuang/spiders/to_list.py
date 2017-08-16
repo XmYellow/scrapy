@@ -1,5 +1,5 @@
 import json
-#python to_list.py -s baidu.json -t baidu.list
+#python to_list.py -s baidu.json -t baidu.txt
 def main(source, target):
     with open(source) as f:
         items = json.load(f)
